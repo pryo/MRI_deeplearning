@@ -5,17 +5,16 @@ from torch.optim import lr_scheduler
 import numpy as np
 import json
 from datetime import datetime
-from torchvision import datasets, models, transforms
-import matplotlib.pyplot as plt
+
 import time
 import os
 import copy
 import torch.utils as utils
 from torch.utils.data.sampler import SubsetRandomSampler
-#from APT.loader import *
-from APT.doubleChannelLoaderv2 import *
-#from APT.multichannelDensnet import *
-import APT.multichannelDensenetv2 as MD
+
+from dataset import *
+
+import densenet as MD
 
 import pickle
 data_dir = r"C:\Users\wzuo\Developer\ML for APT\data"

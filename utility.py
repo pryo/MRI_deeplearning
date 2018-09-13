@@ -1,11 +1,10 @@
-import pandas as pd
-import os
-import numpy as np
+
 import matplotlib.pyplot as plt
-from APT.doubleChannelLoaderv2 import *
-#import APT.multichannelDensenet as MD
-import APT.multichannelDensenetv2 as MDv2
+from dataset import *
+
+import densenet as MD
 import pickle
+import torch.nn as nn
 import torch.nn as nn
 def readCoor(ID, df):
 
@@ -62,78 +61,7 @@ def showSample(ID):
     local.imshow(patch)
     plt.show()
 
-# def findBadAppleinDual(modelPath,patchModelPath,loader):
-#     # modelPath = r'C:\Users\wzuo\Developer\ML for APT\models\1534191799.996107.model'
-#     # patchModelPath=r'C:\Users\wzuo\Developer\ML for APT\models\1534191799.996107.patchModel'
-#     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-#     wrongs=[]
-#     model = MD.densenet201()
-#     patchModel =MD.SimpleNet()
-#     num_ftrs = model.classifier.in_features
-#     model.classifier = nn.Linear(num_ftrs+1+10, 2) # and age and patch vector
-#     model.classifier =nn.Sequential(
-#     nn.Linear(num_ftrs+1+10, 256),
-#     nn.ReLU(),
-#     nn.Linear(256,2)
-# )
-#     #the_model = TheModelClass(*args, **kwargs)
-#     model.load_state_dict(torch.load(modelPath))
-#     patchModel.load_state_dict(torch.load(patchModelPath))
-#     model = model.to(device)
-#     patchModel = patchModel.to(device)
-#     patchModel.eval()
-#     model.eval()
-#     for batch_idx,sample in enumerate(loader):
-#         images = sample['image'].to(device)
-#         patchs = sample['patch'].to(device)
-#         ages = sample['age'].to(device)
-#         labels = sample['label'].to(device)
-#         ids = sample['id']
-#         interimOut = patchModel(patchs)
-#         outputs = model(images,ages,interimOut)
-#         _, preds = torch.max(outputs, 1)
-#         #wrongs.append(ids[preds != labels.data])
-#         #print(ids)
-#         #print(preds != labels.data)
-#         if (preds != labels.data)[0]:
-#             wrongs.append(ids[0])
-#     return wrongs
-# def findGoodAppleinDual(modelPath,patchModelPath,loader):
-#     # modelPath = r'C:\Users\wzuo\Developer\ML for APT\models\1534191799.996107.model'
-#     # patchModelPath=r'C:\Users\wzuo\Developer\ML for APT\models\1534191799.996107.patchModel'
-#     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-#     wrongs=[]
-#     model = MD.densenet201()
-#     patchModel =MD.SimpleNet()
-#     num_ftrs = model.classifier.in_features
-#     model.classifier = nn.Linear(num_ftrs+1+10, 2) # and age and patch vector
-#     model.classifier =nn.Sequential(
-#     nn.Linear(num_ftrs+1+10, 256),
-#     nn.ReLU(),
-#     nn.Linear(256,2)
-# )
-#     #the_model = TheModelClass(*args, **kwargs)
-#     model.load_state_dict(torch.load(modelPath))
-#     patchModel.load_state_dict(torch.load(patchModelPath))
-#     model = model.to(device)
-#     patchModel = patchModel.to(device)
-#     patchModel.eval()
-#     model.eval()
-#     for batch_idx,sample in enumerate(loader):
-#         images = sample['image'].to(device)
-#         patchs = sample['patch'].to(device)
-#         ages = sample['age'].to(device)
-#         labels = sample['label'].to(device)
-#         ids = sample['id']
-#         interimOut = patchModel(patchs)
-#         outputs = model(images,ages,interimOut)
-#         _, preds = torch.max(outputs, 1)
-#         #wrongs.append(ids[preds != labels.data])
-#         #print(ids)
-#         #print(preds != labels.data)
-#         if (preds == labels.data)[0]:
-#             wrongs.append(ids[0])
-#     return wrongs
+
 def getLoader():
     data_dir = r"C:\Users\wzuo\Developer\ML for APT\data"
     gz_list_path = r"C:\Users\wzuo\Developer\ML for APT\data\gz_list.p"
@@ -179,19 +107,14 @@ def findBadAppleinDualDenseExtClassifier(extClassiferPath,loader):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     wrongs=[]
     #model = MD.densenet201()
-    model_global = MDv2.densenet201(pretrained=True)
-    model_local = MDv2.densenet201(pretrained=True)
+    model_global = MD.densenet201(pretrained=True)
+    model_local = MD.densenet201(pretrained=True)
     # todo change model init
     #patchModel =MD.SimpleNet()
     # todo change second model init
     #num_ftrs = model.classifier.in_features
 
-    #model.classifier = nn.Linear(num_ftrs+1+10, 2) # and age and patch vector
-#     model.classifier =nn.Sequential(
-#     nn.Linear(num_ftrs+1+10, 256),
-#     nn.ReLU(),
-#     nn.Linear(256,2)
-# )
+
     num_ftrs_global = model_global.classifier.in_features
 
     num_ftrs_local = model_local.classifier.in_features
