@@ -4,7 +4,7 @@ import random
 from PIL import Image
 import torch
 import pandas as pd
-from torchvision import datasets, models, transforms
+
 import numpy as np
 
 from torch.utils.data import Dataset, DataLoader
@@ -178,14 +178,7 @@ class DualChannelAPTDataset(Dataset):
             pil_img = np.repeat(apt_img[:, :,np.newaxis], 3, axis=2)
 
         if self.transform:
-#             pil_img = pil_img.clip(min=-5,max=5)+5
-#             pil_img *= (255.0 / pil_img.max())
-#             pil_img_obj = Image.fromarray(pil_img, 'RGB')
-#             pil_img_obj=self.transform(pil_img_obj)
-#             pil_ary=pil_img_obj.numpy()
-#             three_channel_img= torch.from_numpy(pil_ary)
-#             #three_channel_img=np.asarray(pil_img_obj)
-# #            three_channel_img=pil_ary.transpose((2, 0, 1))
+
             three_channel_img=self.applyTransform(pil_img)
             #three_channel_patch=torch.tensor(three_channel_patch)
             three_channel_patch = self.applyTransform(pil_patch)

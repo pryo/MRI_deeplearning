@@ -1,7 +1,7 @@
 
 import matplotlib.pyplot as plt
 from dataset import *
-
+import torchvision.transforms as transforms
 import densenet as MD
 import pickle
 import torch.nn as nn
