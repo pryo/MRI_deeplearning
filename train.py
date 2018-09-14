@@ -11,7 +11,7 @@ import os
 import copy
 import torch.utils as utils
 from torch.utils.data.sampler import SubsetRandomSampler
-
+import torchvision.transforms as transforms
 from dataset import *
 
 import densenet as MD
