@@ -24,7 +24,8 @@ class DualChannelAPTDataset(Dataset):
         self.kki_list = kki_list
         self.ROIdf  = pd.read_csv(ROILogPath,header = None,index_col=0)
         self.dataframe = pd.read_excel(truth_path)
-        self.odd_list = [10,49,73,74,75,76,8,97,100]
+        #self.odd_list = [10,49,73,74,75,76,8,97,100]
+        self.odd_list = [74, 76, 100]
         #todo load truth file
 
     def readCoor(self,ID):
