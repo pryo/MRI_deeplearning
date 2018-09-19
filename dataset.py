@@ -30,6 +30,9 @@ class DualChannelAPTDataset(Dataset):
         self.odd_list = [74, 76, 100]
         #todo load truth file
 
+
+    def getPPMs(self):
+        return self.ppms
     def readCoor(self,ID):
         return eval(str(self.ROIdf.loc[int(ID)][1]))
 
@@ -114,7 +117,7 @@ class DualChannelAPTDataset(Dataset):
                     # Reading.
                     fid = open(apt_img_path, 'rb')
                     data = np.fromfile(fid, dtype)
-
+                    data = self.valueShiftandExpand(data,self.ppms[0],5)
                     try:
                         ch1 = data.reshape((400, 400))
                         ch1 = np.flipud(ch1)
@@ -129,6 +132,7 @@ class DualChannelAPTDataset(Dataset):
                     # Reading.
                     fid = open(apt_img_path, 'rb')
                     data = np.fromfile(fid, dtype)
+                    data = self.valueShiftandExpand(data, self.ppms[1], 5)
                     try:
                         ch2 = data.reshape((400, 400))
                         ch2 = np.flipud(ch2)
@@ -143,6 +147,7 @@ class DualChannelAPTDataset(Dataset):
                     # Reading.
                     fid = open(apt_img_path, 'rb')
                     data = np.fromfile(fid, dtype)
+                    data = self.valueShiftandExpand(data, self.ppms[2], 5)
                     try:
                         ch3 = data.reshape((400, 400))
                         ch3 = np.flipud(ch3)
@@ -197,11 +202,27 @@ class DualChannelAPTDataset(Dataset):
 
         return sample
 
+    def valueShift(self,array,offset=5):
+        array = array.clip(min=-offset, max=offset) + offset
+
+        return array
+    def valueExpand(self,array,bound=255):
+        array *= (bound/ array.max())
+        array = array.astype(np.uint8)
+        return array
+    def valueShiftandExpand(self,data,ppm,offset):
+        if ppm is 'mtr':
+            data = self.valueExpand(data)
+            return data
+        else:
+            data = self.valueShift(data, offset)
+            data = self.valueExpand(data)
+            return data
 
     def applyTransform(self,array):
-        array= array.clip(min=-5,max=5)+5
-        array*= (255.0 / array.max())
-        array = array.astype(np.uint8)
+        # array= array.clip(min=-5,max=5)+5
+        # array*= (255.0 / array.max())
+        # array = array.astype(np.uint8)
         # the type casting is very important, because PIL won't work on floating point
         pil_img_obj = Image.fromarray(array, 'RGB')
         pil_img_obj = self.transform(pil_img_obj)

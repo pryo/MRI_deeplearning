@@ -39,6 +39,7 @@ apt_dataset = DualChannelAPTDataset(data_dir,gz_list,kki_list,ROI_log_path,
                          truth_path=r"C:\Users\wzuo\Developer\ML for APT\idh.xlsx",
                          transform=img_transform,switch=dataset_switch)
 param_dict['dataset_switch'] = dataset_switch
+param_dict['ppms'] = apt_dataset.getPPMs()
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 num_train = len(apt_dataset)
 indices = list(range(num_train))
