@@ -193,10 +193,10 @@ def train_model(modelLocal,modelGlobal,extClassifier,train_loader,validation_loa
 
 
 model_global = MD.densenet201(pretrained=True)
-model_local = MD.densenet201(pretrained=True)
+model_local = MD.densenet169(pretrained=True)
 
 param_dict['model_global'] = 'densenet201'
-param_dict['model_local'] = 'densenet201'
+param_dict['model_local'] = 'densenet169'
 
 # todo change architecture from here
 #patch_model = MD.densenet121(pretrained=True)
@@ -214,15 +214,15 @@ num_ftrs_global = model_global.classifier.in_features
 num_ftrs_local = model_local.classifier.in_features
 
 externalClassifier =nn.Sequential(
-    nn.Linear(num_ftrs_global+num_ftrs_local+1, 128),
+    nn.Linear(num_ftrs_global+num_ftrs_local+1, 256),
     nn.ReLU(),
-    nn.Linear(128,2)
+    nn.Linear(256,2)
 )
 # externalClassifier =nn.Sequential(
 #     nn.Linear(num_ftrs_global+num_ftrs_local+1, 2)
 #
 # )
-param_dict['classifire_shape'] = 'global+local+1,128,2'
+param_dict['classifire_shape'] = 'global+local+1,256,2'
 #model_conv.ageFC = nn.Linear(1,32)
 model_global = model_global.to(device)
 model_local = model_local.to(device)

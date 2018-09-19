@@ -13,10 +13,12 @@ from torch.utils.data import Dataset, DataLoader
 class DualChannelAPTDataset(Dataset):
     """load the apt.img only"""
     def __init__(self,root_dir,gz_list,kki_list,ROILogPath,
-                 truth_path='idh.xlsx',transform=None, switch = 0):
+                 truth_path='idh.xlsx',transform=None, switch = 0,
+                 ppms=['aptw','2ppm','mtr']):
         # switch =0 for all
         #1 for gz
         # 2 for kki
+        self.ppms = ppms
         self.switch = switch
         self.root_dir = root_dir
         self.transform = transform
@@ -106,7 +108,7 @@ class DualChannelAPTDataset(Dataset):
             patchCoor = self.readCoor(id)
 
             for name in os.listdir(dir):
-                if name.endswith('.img') and 'aptw' in name:
+                if name.endswith('.img') and self.ppms[0] in name:
                     apt_img_path = os.path.join(dir,name)
                     dtype = np.dtype('float32')  # big-endian unsigned integer (16bit)
                     # Reading.
@@ -121,7 +123,7 @@ class DualChannelAPTDataset(Dataset):
                     except ValueError:
                         print(str(id)+'is not 400 by 400, skipped to next...')
                         fid.close()
-                if name.endswith('.img') and '1.5ppm' in name:
+                if name.endswith('.img') and self.ppms[1] in name:
                     apt_img_path = os.path.join(dir,name)
                     dtype = np.dtype('float32')  # big-endian unsigned integer (16bit)
                     # Reading.
@@ -135,7 +137,7 @@ class DualChannelAPTDataset(Dataset):
                     except ValueError:
                         print(str(id)+'is not 400 by 400, skipped to next...')
                         fid.close()
-                if name.endswith('.img') and '2.5ppm' in name:
+                if name.endswith('.img') and self.ppms[2] in name:
                     apt_img_path = os.path.join(dir,name)
                     dtype = np.dtype('float32')  # big-endian unsigned integer (16bit)
                     # Reading.
