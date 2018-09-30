@@ -5,7 +5,7 @@ from torch.optim import lr_scheduler
 import numpy as np
 import json
 from datetime import datetime
-
+from utility import getTestAcc
 import time
 import os
 import copy
@@ -17,6 +17,8 @@ from dataset import *
 import densenet as MD
 
 import pickle
+import torchvision
+
 data_dir = r"C:\Users\wzuo\Developer\ML for APT\data"
 gz_list_path = r"C:\Users\wzuo\Developer\ML for APT\data\gz_list.p"
 kki_list_path = r"C:\Users\wzuo\Developer\ML for APT\data\kki_list.p"
@@ -43,25 +45,33 @@ param_dict['ppms'] = apt_dataset.getPPMs()
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 num_train = len(apt_dataset)
 indices = list(range(num_train))
-split = 20
-param_dict['split'] = split
+val_split = 10
+test_split = 10
+param_dict['val_split'] = val_split
+param_dict['test_split'] = test_split
 # Random, non-contiguous split
-validation_idx = np.random.choice(indices, size=split, replace=False)
+validation_idx = np.random.choice(indices, size=val_split, replace=False)
 train_idx = list(set(indices) - set(validation_idx))
+test_idx = np.random.choice(train_idx,size=test_split,replace=False)
+train_idx = list(set(train_idx)-set(test_idx))
 
 
-
-## define our samplers -- we use a SubsetRandomSampler because it will return
-## a random subset of the split defined by the given indices without replaf
+#define our samplers -- we use a SubsetRandomSampler because it will return
+# a random subset of the split defined by the given indices without replaf
 train_sampler = SubsetRandomSampler(train_idx)
 validation_sampler = SubsetRandomSampler(validation_idx)
-param_dict['train_batch'] =25
-param_dict['val_batch'] =20
+test_sampler = SubsetRandomSampler(test_idx)
+
+param_dict['train_batch'] =10
+param_dict['val_batch'] =10
+param_dict['test_batch'] = 1
 train_loader = torch.utils.data.DataLoader(apt_dataset,
                 batch_size=param_dict['train_batch'], sampler=train_sampler)
 
 validation_loader = torch.utils.data.DataLoader(apt_dataset,
                 batch_size=param_dict['val_batch'], sampler=validation_sampler)
+test_loader = torch.utils.data.DataLoader(apt_dataset,
+                batch_size=param_dict['test_batch'], sampler=test_sampler)
 
 
 
@@ -151,11 +161,11 @@ def train_model(modelLocal,modelGlobal,extClassifier,train_loader,validation_loa
                     running_corrects += torch.sum(preds == labels.data)
 
             if phase == 'train':
-                epoch_loss = running_loss / (len(apt_dataset)-split)
-                epoch_acc = running_corrects.double() / (len(apt_dataset)-split)
+                epoch_loss = running_loss / (len(apt_dataset)-val_split)
+                epoch_acc = running_corrects.double() / (len(apt_dataset)-val_split)
             else:
-                epoch_loss = running_loss / split
-                epoch_acc = running_corrects.double() / split
+                epoch_loss = running_loss / val_split
+                epoch_acc = running_corrects.double() / val_split
 
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(
                 phase, epoch_loss, epoch_acc))
@@ -254,3 +264,6 @@ model_conv = train_model(model_local,model_global,externalClassifier,
                          exp_lr_scheduler,
                          param_dict,
                          num_epochs=param_dict['epochs'])
+
+test_acc = getTestAcc(externalClassifier,test_loader,model_local,model_global,device,test_split)
+print('test_acc:{:4f}'.format(test_acc))

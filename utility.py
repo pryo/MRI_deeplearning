@@ -99,7 +99,25 @@ def saveToDisk(ID,path):
 # def getRGBimg(id,PIL=True):
 #     if PIL:
 #
+def getTestAcc(extClassierModel,testLoader,model_local,model_global,device,test_split):
+    corrects = 0
+    for batch_idx,sample in enumerate(testLoader):
+        images = sample['image'].to(device)
+        patchs = sample['patch'].to(device)
+        ages = sample['age'].to(device)
+        labels = sample['label'].to(device)
+        ids = sample['id']
+        with torch.set_grad_enabled(False):
+            outputLocal = model_local(patchs)
+            outputGlobal = model_global(images)
+            interim = torch.cat((outputGlobal, outputLocal), 1)
+            interim = torch.cat((ages.unsqueeze(1), interim), 1)
+            outputs = extClassierModel(interim)
+            _, preds = torch.max(outputs, 1)
 
+        corrects += torch.sum(preds == labels.data)
+    epoch_acc = corrects.double() / test_split
+    return epoch_acc
 def findBadAppleinDualDenseExtClassifier(extClassiferPath,loader):
 
     # modelPath = r'C:\Users\wzuo\Developer\ML for APT\models\1534191799.996107.model'
