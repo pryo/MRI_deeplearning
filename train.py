@@ -18,12 +18,20 @@ import densenet as MD
 
 import pickle
 import torchvision
-
+import random
 data_dir = r"C:\Users\wzuo\Developer\ML for APT\data"
-gz_list_path = r"C:\Users\wzuo\Developer\ML for APT\data\gz_list.p"
+#gz_list_path = r"C:\Users\wzuo\Developer\ML for APT\data\gz_list.p" #gz_list of all apt
+gz_list_path = r"C:\Users\wzuo\Developer\ML for APT\data\gz_list.p"#gz_list of part A
+part_c=15 # overall testset size
 kki_list_path = r"C:\Users\wzuo\Developer\ML for APT\data\kki_list.p"
 ROI_log_path = r"C:\Users\wzuo\Developer\ML for APT\APT\1D_APT_ROI_Log.csv"
 gz_list=pickle.load( open( gz_list_path, "rb" ) )
+overall_test=random.sample(set(gz_list), part_c)
+with open(r"C:\Users\wzuo\Developer\IDH deeplearning\data\overall_test_list", "wb") as fp:   #Pickling
+    pickle.dump(overall_test, fp)
+#gz_list = pickle.load( open( gz_list_path, "rb" ) )
+for i in overall_test:
+    gz_list.remove(i)#exclude patient with all 4 channel
 kki_list=pickle.load( open( kki_list_path, "rb" ) )
 param_dict = {}
 param_dict['training_file'] = os.path.basename(__file__)
@@ -46,7 +54,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 num_train = len(apt_dataset)
 indices = list(range(num_train))
 val_split = 10
-test_split = 10
+test_split = 0
 param_dict['val_split'] = val_split
 param_dict['test_split'] = test_split
 # Random, non-contiguous split
@@ -76,7 +84,7 @@ test_loader = torch.utils.data.DataLoader(apt_dataset,
 
 
 def train_model(modelLocal,modelGlobal,extClassifier,train_loader,validation_loader,device,criterion, optimizer, scheduler,param_dict, num_epochs=25):
-
+    model_path = r'C:\Users\wzuo\Developer\IDH deeplearning\model'
     since = time.time()
 
     #best_model_wts = copy.deepcopy(modelGlobal.state_dict())
@@ -196,8 +204,8 @@ def train_model(modelLocal,modelGlobal,extClassifier,train_loader,validation_loa
     # torch.save(patchModel.state_dict(),
     #            os.path.join(r'C:\Users\wzuo\Developer\ML for APT\models', model_serial + '.patchModel'))
     torch.save(extClassifier.state_dict(),
-               os.path.join(r'C:\Users\wzuo\Developer\ML for APT\models', model_serial + '.clsmodel'))
-    with open(os.path.join(r'C:\Users\wzuo\Developer\ML for APT\models', model_serial + '.json'), 'w') as fp:
+               os.path.join(model_path, model_serial + '.clsmodel'))
+    with open(os.path.join(model_path, model_serial + '.json'), 'w') as fp:
         json.dump(param_dict, fp)
 
     return extClassifier
